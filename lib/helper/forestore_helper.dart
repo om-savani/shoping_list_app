@@ -2,16 +2,18 @@ import '../../../headers.dart';
 
 class FirestoreHelper {
   FirestoreHelper._();
-  static FirestoreHelper firestoreHelper = FirestoreHelper._();
-  FirebaseFirestore firestore = FirebaseFirestore.instance;
+  static final FirestoreHelper instance = FirestoreHelper._();
+  final FirebaseFirestore firestore = FirebaseFirestore.instance;
 
   void addProduct({required ProductModel product}) {
-    firestore.collection("products").add(product.toMap());
+    firestore
+        .collection("products")
+        .doc(product.id)
+        .set(product.toMap(), SetOptions(merge: true));
   }
 
-  Future<QuerySnapshot<Map<String, dynamic>>> getProducts() {
-    var data = firestore.collection('products').get();
-    return data;
+  Stream<QuerySnapshot<Map<String, dynamic>>> getProducts() {
+    return firestore.collection('products').snapshots();
   }
 
   void updateProduct({required ProductModel product}) {

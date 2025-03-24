@@ -1,17 +1,15 @@
 import '../../../headers.dart';
 
 class HomeController extends GetxController {
-  Future<QuerySnapshot<Map<String, dynamic>>> getProducts() {
-    var data = FirestoreHelper.firestoreHelper.getProducts();
-    update();
-    return data;
+  Stream<QuerySnapshot<Map<String, dynamic>>> getProducts() {
+    return FirestoreHelper.instance.getProducts();
   }
 
   Future<bool> addProduct({required ProductModel product}) async {
     if (product.id.isNotEmpty &&
         product.name.isNotEmpty &&
         product.price.isNotEmpty) {
-      FirestoreHelper.firestoreHelper.addProduct(product: product);
+      FirestoreHelper.instance.addProduct(product: product);
       update();
       return true;
     } else {
@@ -25,7 +23,7 @@ class HomeController extends GetxController {
     if (product.id.isNotEmpty &&
         product.name.isNotEmpty &&
         product.price.isNotEmpty) {
-      FirestoreHelper.firestoreHelper.updateProduct(product: product);
+      FirestoreHelper.instance.updateProduct(product: product);
       update();
       return true;
     } else {
@@ -36,7 +34,24 @@ class HomeController extends GetxController {
   }
 
   void deleteProduct({required String id}) {
-    FirestoreHelper.firestoreHelper.deleteProduct(id: id);
+    FirestoreHelper.instance.deleteProduct(id: id);
+    update();
+  }
+
+  Future<void> addToCart(ProductModel product) async {
+    await DBHelper.dbHelper.insertCartItem(product);
+    Get.snackbar("Added", "${product.name} added to cart",
+        backgroundColor: Colors.green);
+    update();
+  }
+
+  Future<List<ProductModel>> fetchCartItems() async {
+    update();
+    return await DBHelper.dbHelper.getCartItems();
+  }
+
+  Future<void> removeCartItem(String id) async {
+    await DBHelper.dbHelper.deleteCartItem(id);
     update();
   }
 }
